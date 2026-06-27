@@ -13,3 +13,7 @@ Route::post('/save-unit-configuration', [SaveController::class, 'saveUnitConfigu
 
 Route::post('/save-technician-configuration', [SaveController::class, 'saveTechnicianConfiguration']
 )->name('technicians.save');
+
+// A* Technician Assignment
+Route::get('/technician', [AIController::class, 'showTechnicianForm'])->name('technician.form');
+Route::post('/technician/process', [AIController::class, 'processTechnician'])->name('technician.process');

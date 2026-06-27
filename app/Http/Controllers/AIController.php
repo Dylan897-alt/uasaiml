@@ -11,7 +11,6 @@ class AIController extends Controller
     public function showForm()
     {
         $unitConfigurations = SavedUnitConfiguration::with('units')->get();
-
         $technicianConfigurations = SavedTechnicianConfiguration::with('technicians')->get();
 
         return view('form', compact(
@@ -19,6 +18,8 @@ class AIController extends Controller
             'technicianConfigurations'
         ));
     }
+
+    // ==================== HELPERS ====================
 
     private function calculateAttractiveness($remaining_mw)
     {
@@ -30,23 +31,15 @@ class AIController extends Controller
     private function scoreSolution($solution, $listrik, $total_mw, $num_periods)
     {
         $penalty = 0;
-
         for ($t = 0; $t < $num_periods; $t++) {
             $total_used = 0;
-
             for ($i = 0; $i < count($listrik); $i++) {
                 $total_used += $solution[$i][$t] * $listrik[$i];
             }
-
             $remaining = $total_mw - $total_used;
-
-            if ($remaining < 100) {
-                $penalty += 1000;
-            } elseif ($remaining < 115) {
-                $penalty += 100;
-            }
+            if ($remaining < 100) $penalty += 1000;
+            elseif ($remaining < 115) $penalty += 100;
         }
-
         return 1 / (1 + $penalty);
     }
 
@@ -55,14 +48,12 @@ class AIController extends Controller
         $listrik = [];
         $unit_groups = [];
         $event_labels = [];
-
         $currentIndex = 0;
         $unitCounter = 1;
 
         foreach ($units_input as $unit) {
             $mw = (int) $unit['mw'];
             $events_count = (int) $unit['events'] * 2;
-
             $group = [];
             $alphabet = range('a', 'z');
 
@@ -85,14 +76,8 @@ class AIController extends Controller
     }
 
     private function constructSolution(
-        $num_events,
-        $num_periods,
-        $listrik,
-        $total_mw,
-        &$pheromone,
-        $unit_groups,
-        $alpha,
-        $beta
+        $num_events, $num_periods, $listrik, $total_mw,
+        &$pheromone, $unit_groups, $alpha, $beta
     ) {
         $used_mw = array_fill(0, $num_periods, 0);
         $solution = array_fill(0, $num_events, array_fill(0, $num_periods, 0));
@@ -121,7 +106,6 @@ class AIController extends Controller
                 }
             }
 
-            // Since total events is doubled, this splits it perfectly back to the semester count.
             $max_per_sem = max(intdiv(count($my_group), 2), 1);
             $sem1 = 0;
             $sem2 = 0;
@@ -180,19 +164,14 @@ class AIController extends Controller
         return $solution;
     }
 
-    public function processScheduling(Request $request)
+    // ==================== ACO ====================
+
+    private function runACO($total_mw, $num_ants, $units_input)
     {
-        $total_mw = (int) $request->input('total_mw', 150);
-        $num_ants = (int) $request->input('num_ants', 30);
-        $units_input = $request->input('units', []);
-
         $eventData = $this->buildEvents($units_input);
-
         $listrik = $eventData['listrik'];
         $unit_groups = $eventData['unit_groups'];
         $event_labels = $eventData['event_labels'];
-
-        //dd($unit_groups);
 
         $num_events = count($listrik);
         $num_periods = 12;
@@ -200,14 +179,8 @@ class AIController extends Controller
         $beta = 3;
         $evaporation_rate = 0.4;
 
-        if ($num_events === 0) {
-            return redirect()->back()->with('error', 'Please add at least one unit.');
-        }
-
         $pheromone = array_fill(0, $num_events, array_fill(0, $num_periods, 0));
 
-
-        // MAIN LOOP
         $bestSolution = null;
         $bestScore = -INF;
         $scoreHistory = [];
@@ -217,14 +190,8 @@ class AIController extends Controller
 
             for ($a = 0; $a < $num_ants; $a++) {
                 $sol = $this->constructSolution(
-                    $num_events,
-                    $num_periods,
-                    $listrik,
-                    $total_mw,
-                    $pheromone,
-                    $unit_groups,
-                    $alpha,
-                    $beta
+                    $num_events, $num_periods, $listrik,
+                    $total_mw, $pheromone, $unit_groups, $alpha, $beta
                 );
                 $ants[] = $sol;
                 $s = $this->scoreSolution($sol, $listrik, $total_mw, $num_periods);
@@ -256,42 +223,213 @@ class AIController extends Controller
 
             if (count($scoreHistory) >= 3) {
                 $n = count($scoreHistory);
-                if ($scoreHistory[$n - 1] == $scoreHistory[$n - 2] && $scoreHistory[$n - 2] == $scoreHistory[$n - 3]) {
+                if ($scoreHistory[$n-1] == $scoreHistory[$n-2] && $scoreHistory[$n-2] == $scoreHistory[$n-3]) {
                     break;
                 }
             }
         }
 
-        // Ambil data akhir
+        // Build distribution
         $distribution = [];
-
         for ($t = 0; $t < $num_periods; $t++) {
             $used = 0;
             $scheduled = [];
-
             for ($i = 0; $i < $num_events; $i++) {
                 if ($bestSolution[$i][$t] == 1) {
                     $used += $listrik[$i];
-
                     preg_match('/^\d+/', $event_labels[$i], $matches);
                     $unit_number = $matches[0] ?? ($i + 1);
-
-                    $scheduled[] = "unit " . $unit_number;
+                    $scheduled[] = 'unit ' . $unit_number;
                 }
             }
             sort($scheduled);
-
             $distribution[$t] = [
-                'used' => $used,
+                'used'      => $used,
                 'remaining' => $total_mw - $used,
-                'units' => array_unique($scheduled)
+                'units'     => array_unique($scheduled),
             ];
         }
 
-        return view('index', [
-            'solution' => $bestSolution,
+        return [
+            'solution'     => $bestSolution,
             'distribution' => $distribution,
-            'event_labels' => $event_labels
+            'event_labels' => $event_labels,
+            'listrik'      => $listrik,
+            'num_events'   => $num_events,
+            'num_periods'  => $num_periods,
+        ];
+    }
+
+    // ==================== A* ====================
+
+    private function runAstar($acoResult, $teams_input)
+    {
+        $bestSolution  = $acoResult['solution'];
+        $event_labels  = $acoResult['event_labels'];
+        $listrik       = $acoResult['listrik'];
+        $num_events    = $acoResult['num_events'];
+        $num_periods   = $acoResult['num_periods'];
+
+        // Build events list from ACO output: period + unit_mw
+        $events = [];
+        for ($i = 0; $i < $num_events; $i++) {
+            for ($t = 0; $t < $num_periods; $t++) {
+                if ($bestSolution[$i][$t] == 1) {
+                    $events[] = [
+                        'label'   => $event_labels[$i],
+                        'period'  => $t + 1,
+                        'unit_mw' => $listrik[$i],
+                    ];
+                }
+            }
+        }
+        usort($events, fn($a, $b) => $a['period'] - $b['period']);
+
+        // Build teams from form input
+        $teams = [];
+        foreach ($teams_input as $t) {
+            $type     = $t['type'] ?? 'all';
+            $operator = $t['operator'] ?? '>=';
+            $mw_limit = isset($t['mw_limit']) ? (int) $t['mw_limit'] : 0;
+
+            if ($type === 'all') {
+                $min_mw = 0;
+                $max_mw = 9999;
+            } elseif ($operator === '>=') {
+                $min_mw = $mw_limit;
+                $max_mw = 9999;
+            } else {
+                $min_mw = 0;
+                $max_mw = $mw_limit;
+            }
+
+            $teams[] = [
+                'name'   => $t['name'],
+                'cost'   => (float) $t['cost'],
+                'min_mw' => $min_mw,
+                'max_mw' => $max_mw,
+            ];
+        }
+
+        $numTeams  = count($teams);
+        $numEvents = count($events);
+
+        // Cheapest cost for admissible heuristic
+        $minCostGlobal = PHP_INT_MAX;
+        foreach ($teams as $tt) {
+            if ($tt['cost'] < $minCostGlobal) $minCostGlobal = $tt['cost'];
+        }
+
+        // A* open list
+        $openList = [[
+            'f'           => 0,
+            'g'           => 0,
+            'idx'         => 0,
+            'streaks'     => array_fill(0, $numTeams, 0),
+            'assignments' => [],
+            'busy'        => array_fill(0, $numTeams, -1),
+        ]];
+
+        $bestResult = null;
+
+        while (!empty($openList)) {
+            usort($openList, fn($a, $b) => $a['f'] <=> $b['f']);
+            $node = array_shift($openList);
+
+            $idx = $node['idx'];
+
+            if ($idx >= $numEvents) {
+                $bestResult = $node;
+                break;
+            }
+
+            $event   = $events[$idx];
+            $period  = $event['period'];
+            $unit_mw = $event['unit_mw'];
+
+            foreach ($teams as $ti => $team) {
+                if ($unit_mw < $team['min_mw'] || $unit_mw > $team['max_mw']) continue;
+                if ($node['busy'][$ti] === $period) continue;
+
+                $streaks = $node['streaks'];
+                $cost    = $team['cost'];
+                if ($streaks[$ti] >= 3) $cost *= 1.2;
+
+                $newG = $node['g'] + $cost;
+
+                $newStreaks = $streaks;
+                if ($node['busy'][$ti] === $period - 1) {
+                    $newStreaks[$ti]++;
+                } else {
+                    $newStreaks[$ti] = 1;
+                }
+
+                $remaining = $numEvents - $idx - 1;
+                $h         = $remaining * $minCostGlobal;
+
+                $newBusy         = $node['busy'];
+                $newBusy[$ti]    = $period;
+
+                $newAssignments   = $node['assignments'];
+                $newAssignments[] = [
+                    'event'    => $event['label'],
+                    'period'   => $period,
+                    'team'     => $team['name'],
+                    'cost'     => round($cost, 2),
+                    'overtime' => $streaks[$ti] >= 3,
+                ];
+
+                $openList[] = [
+                    'f'           => $newG + $h,
+                    'g'           => $newG,
+                    'idx'         => $idx + 1,
+                    'streaks'     => $newStreaks,
+                    'assignments' => $newAssignments,
+                    'busy'        => $newBusy,
+                ];
+            }
+
+            if (count($openList) > 5000) {
+                usort($openList, fn($a, $b) => $a['f'] <=> $b['f']);
+                $openList = array_slice($openList, 0, 500);
+            }
+        }
+
+        if (!$bestResult) return null;
+
+        return [
+            'assignments' => $bestResult['assignments'],
+            'total_cost'  => round($bestResult['g'], 2),
+        ];
+    }
+
+    // ==================== MAIN PROCESS ====================
+
+    public function processScheduling(Request $request)
+    {
+        $total_mw    = (int) $request->input('total_mw', 150);
+        $num_ants    = (int) $request->input('num_ants', 30);
+        $units_input = $request->input('units', []);
+        $teams_input = $request->input('teams', []);
+
+        if (empty($units_input)) {
+            return redirect()->back()->with('error', 'Please add at least one unit.');
+        }
+
+        // Run ACO
+        $acoResult = $this->runACO($total_mw, $num_ants, $units_input);
+
+        // Run A* using ACO output
+        $astarResult = null;
+        if (!empty($teams_input)) {
+            $astarResult = $this->runAstar($acoResult, $teams_input);
+        }
+
+        return view('index', [
+            'solution'     => $acoResult['solution'],
+            'distribution' => $acoResult['distribution'],
+            'event_labels' => $acoResult['event_labels'],
+            'astar'        => $astarResult,
         ]);
     }
 }
