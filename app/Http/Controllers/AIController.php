@@ -180,7 +180,6 @@ class AIController extends Controller
     }
 
     // ACO
-
     private function runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod)
     {
         $eventData = $this->buildEvents($units_input);
@@ -279,6 +278,7 @@ class AIController extends Controller
             'listrik'      => $listrik,
             'num_events'   => $num_events,
             'num_periods'  => $num_periods,
+            'history'      => $scoreHistory,
         ];
     }
 
@@ -353,10 +353,13 @@ class AIController extends Controller
         ]];
 
         $bestResult = null;
+        $astarHistory = [];
 
         while (!empty($openList)) {
             usort($openList, fn($a, $b) => $a['f'] <=> $b['f']);
             $node = array_shift($openList);
+
+            $astarHistory[] = round($node['f'], 2);
 
             $idx = $node['idx'];
 
@@ -432,6 +435,7 @@ class AIController extends Controller
         return [
             'assignments' => $bestResult['assignments'],
             'total_cost'  => round($bestResult['g'], 2),
+            'history'     => $astarHistory,
         ];
     }
 
@@ -451,7 +455,7 @@ class AIController extends Controller
         // Run ACO
         $maxEventsPerPeriod = INF;
 
-        if(count($teams_input) > 0){
+        if (count($teams_input) > 0) {
             $maxEventsPerPeriod = count($teams_input);
         }
 
@@ -459,8 +463,39 @@ class AIController extends Controller
 
         // Run A* using ACO output
         $astarResult = null;
+        $astarHistoryData = [];
+
         if (!empty($teams_input)) {
             $astarResult = $this->runAstar($acoResult, $teams_input);
+            if ($astarResult) {
+                $astarHistoryData = $astarResult['history'];
+            }
+        }
+
+        // 1. Siapkan data untuk Heatmap (Event x Periode)
+        $heatmapData = [];
+        for ($i = 0; $i < $acoResult['num_events']; $i++) {
+            $dataPeriode = [];
+            for ($t = 0; $t < $acoResult['num_periods']; $t++) {
+                $dataPeriode[] = [
+                    'x' => 'P' . ($t + 1),
+                    'y' => $acoResult['solution'][$i][$t] // Nilainya 1 jika maintenance, 0 jika tidak
+                ];
+            }
+            $heatmapData[] = [
+                'name' => $acoResult['event_labels'][$i],
+                'data' => $dataPeriode
+            ];
+        }
+
+        // 2. Siapkan data untuk Bar Chart Distribusi Daya
+        $categoriesDaya = [];
+        $dayaUsed = [];
+        $dayaRemaining = [];
+        foreach ($acoResult['distribution'] as $t => $data) {
+            $categoriesDaya[] = 'P' . ($t + 1);
+            $dayaUsed[] = $data['used'];
+            $dayaRemaining[] = $data['remaining'];
         }
 
         return view('index', [
@@ -468,6 +503,13 @@ class AIController extends Controller
             'distribution' => $acoResult['distribution'],
             'event_labels' => $acoResult['event_labels'],
             'astar'        => $astarResult,
+            // Data tambahan untuk Visualisasi:
+            'heatmapData'  => $heatmapData,
+            'categoriesDaya' => $categoriesDaya,
+            'dayaUsed'     => $dayaUsed,
+            'dayaRemaining' => $dayaRemaining,
+            'acoHistory'   => $acoResult['history'],
+            'astarHistory' => $astarHistoryData,
         ]);
     }
 }
