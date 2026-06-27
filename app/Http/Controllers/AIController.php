@@ -19,7 +19,7 @@ class AIController extends Controller
         ));
     }
 
-    // ==================== HELPERS ====================
+    // HELPERS
 
     private function calculateAttractiveness($remaining_mw)
     {
@@ -76,16 +76,30 @@ class AIController extends Controller
     }
 
     private function constructSolution(
-        $num_events, $num_periods, $listrik, $total_mw,
-        &$pheromone, $unit_groups, $alpha, $beta
+        $num_events,
+        $num_periods,
+        $listrik,
+        $total_mw,
+        &$pheromone,
+        $unit_groups,
+        $alpha,
+        $beta,
+        $maxEventsPerPeriod
     ) {
         $used_mw = array_fill(0, $num_periods, 0);
+        $eventsPerPeriod = array_fill(0, $num_periods, 0);
         $solution = array_fill(0, $num_events, array_fill(0, $num_periods, 0));
 
         for ($i = 0; $i < $num_events; $i++) {
             $attractiveness = [];
             $numerator = [];
             $valid_mask = array_fill(0, $num_periods, 1);
+
+            for ($t = 0; $t < $num_periods; $t++) {
+                if ($eventsPerPeriod[$t] >= $maxEventsPerPeriod) {
+                    $valid_mask[$t] = 0;
+                }
+            }
 
             for ($t = 0; $t < $num_periods; $t++) {
                 $remaining = $total_mw - ($used_mw[$t] + $listrik[$i]);
@@ -159,14 +173,15 @@ class AIController extends Controller
 
             $solution[$i][$chosen] = 1;
             $used_mw[$chosen] += $listrik[$i];
+            $eventsPerPeriod[$chosen]++;
         }
 
         return $solution;
     }
 
-    // ==================== ACO ====================
+    // ACO
 
-    private function runACO($total_mw, $num_ants, $units_input)
+    private function runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod)
     {
         $eventData = $this->buildEvents($units_input);
         $listrik = $eventData['listrik'];
@@ -190,8 +205,15 @@ class AIController extends Controller
 
             for ($a = 0; $a < $num_ants; $a++) {
                 $sol = $this->constructSolution(
-                    $num_events, $num_periods, $listrik,
-                    $total_mw, $pheromone, $unit_groups, $alpha, $beta
+                    $num_events,
+                    $num_periods,
+                    $listrik,
+                    $total_mw,
+                    $pheromone,
+                    $unit_groups,
+                    $alpha,
+                    $beta,
+                    $maxEventsPerPeriod
                 );
                 $ants[] = $sol;
                 $s = $this->scoreSolution($sol, $listrik, $total_mw, $num_periods);
@@ -223,7 +245,7 @@ class AIController extends Controller
 
             if (count($scoreHistory) >= 3) {
                 $n = count($scoreHistory);
-                if ($scoreHistory[$n-1] == $scoreHistory[$n-2] && $scoreHistory[$n-2] == $scoreHistory[$n-3]) {
+                if ($scoreHistory[$n - 1] == $scoreHistory[$n - 2] && $scoreHistory[$n - 2] == $scoreHistory[$n - 3]) {
                     break;
                 }
             }
@@ -260,7 +282,7 @@ class AIController extends Controller
         ];
     }
 
-    // ==================== A* ====================
+    // A*
 
     private function runAstar($acoResult, $teams_input)
     {
@@ -270,7 +292,7 @@ class AIController extends Controller
         $num_events    = $acoResult['num_events'];
         $num_periods   = $acoResult['num_periods'];
 
-        // Build events list from ACO output: period + unit_mw
+        // Build events list from ACO output
         $events = [];
         for ($i = 0; $i < $num_events; $i++) {
             for ($t = 0; $t < $num_periods; $t++) {
@@ -314,7 +336,7 @@ class AIController extends Controller
         $numTeams  = count($teams);
         $numEvents = count($events);
 
-        // Cheapest cost for admissible heuristic
+        // Cheapest cost for h(n)
         $minCostGlobal = PHP_INT_MAX;
         foreach ($teams as $tt) {
             if ($tt['cost'] < $minCostGlobal) $minCostGlobal = $tt['cost'];
@@ -351,17 +373,32 @@ class AIController extends Controller
                 if ($unit_mw < $team['min_mw'] || $unit_mw > $team['max_mw']) continue;
                 if ($node['busy'][$ti] === $period) continue;
 
-                $streaks = $node['streaks'];
-                $cost    = $team['cost'];
-                if ($streaks[$ti] >= 3) $cost *= 1.2;
+                // Cek apakah penugasan ini berturut-turut dengan bulan sebelumnya
+                $isConsecutive = ($node['busy'][$ti] === $period - 1);
+
+                // Jika tidak berturut-turut (habis istirahat), streak dianggap 0 sebelum hitung biaya.
+                if ($isConsecutive) {
+                    $currentStreak = $node['streaks'][$ti];
+                } else {
+                    $currentStreak = 0;
+                }
+
+                $cost = $team['cost'];
+
+                // Jika streak berturut-turut sudah mencapai 3 atau lebih
+                if ($currentStreak >= 3) {
+                    $jumlahBulanOvertime = $currentStreak - 3 + 1; // Bulan ke-4 = 1 kali lembur, dst
+                    $cost = $team['cost'] * pow(1.2, $jumlahBulanOvertime);
+                }
 
                 $newG = $node['g'] + $cost;
 
-                $newStreaks = $streaks;
-                if ($node['busy'][$ti] === $period - 1) {
+                // Update streak untuk disimpan ke node berikutnya
+                $newStreaks = $node['streaks'];
+                if ($isConsecutive) {
                     $newStreaks[$ti]++;
                 } else {
-                    $newStreaks[$ti] = 1;
+                    $newStreaks[$ti] = 1; // Streak dimulai ulang dari 1 karena habis istirahat
                 }
 
                 $remaining = $numEvents - $idx - 1;
@@ -376,7 +413,7 @@ class AIController extends Controller
                     'period'   => $period,
                     'team'     => $team['name'],
                     'cost'     => round($cost, 2),
-                    'overtime' => $streaks[$ti] >= 3,
+                    'overtime' => $currentStreak >= 3,
                 ];
 
                 $openList[] = [
@@ -388,11 +425,6 @@ class AIController extends Controller
                     'busy'        => $newBusy,
                 ];
             }
-
-            if (count($openList) > 5000) {
-                usort($openList, fn($a, $b) => $a['f'] <=> $b['f']);
-                $openList = array_slice($openList, 0, 500);
-            }
         }
 
         if (!$bestResult) return null;
@@ -403,7 +435,7 @@ class AIController extends Controller
         ];
     }
 
-    // ==================== MAIN PROCESS ====================
+    // PROGRAM MAIN
 
     public function processScheduling(Request $request)
     {
@@ -417,7 +449,13 @@ class AIController extends Controller
         }
 
         // Run ACO
-        $acoResult = $this->runACO($total_mw, $num_ants, $units_input);
+        $maxEventsPerPeriod = INF;
+
+        if(count($teams_input) > 0){
+            $maxEventsPerPeriod = count($teams_input);
+        }
+
+        $acoResult = $this->runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod);
 
         // Run A* using ACO output
         $astarResult = null;
