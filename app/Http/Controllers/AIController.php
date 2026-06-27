@@ -3,12 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\SavedUnitConfiguration;
+use App\Models\SavedTechnicianConfiguration;
 
 class AIController extends Controller
 {
     public function showForm()
     {
-        return view('form');
+        $unitConfigurations = SavedUnitConfiguration::with('units')->get();
+
+        $technicianConfigurations = SavedTechnicianConfiguration::with('technicians')->get();
+
+        return view('form', compact(
+            'unitConfigurations',
+            'technicianConfigurations'
+        ));
     }
 
     private function calculateAttractiveness($remaining_mw)
@@ -197,7 +206,7 @@ class AIController extends Controller
 
         $pheromone = array_fill(0, $num_events, array_fill(0, $num_periods, 0));
 
-        
+
         // MAIN LOOP
         $bestSolution = null;
         $bestScore = -INF;
