@@ -361,7 +361,7 @@
             opacity: .62;
         }
 
-        .card > * {
+        .card>* {
             position: relative;
             z-index: 1;
         }
@@ -564,6 +564,7 @@
         }
 
         @media (max-width: 920px) {
+
             .hero-grid,
             .grid-2 {
                 grid-template-columns: 1fr;
@@ -609,16 +610,20 @@
                 <div class="hero-grid">
                     <div class="hero-text">
                         <h2>Selamat datang di sistem optimasi pemeliharaan</h2>
-                        <p>Website ini membantu Anda mengatur konfigurasi unit, memasukkan tim teknisi, dan menjalankan algoritma ACO + A* untuk menghasilkan jadwal maintenance yang lebih efisien dan terkontrol.</p>
+                        <p>Website ini membantu Anda mengatur konfigurasi unit, memasukkan tim teknisi, dan menjalankan
+                            algoritma ACO + A* untuk menghasilkan jadwal maintenance yang lebih efisien dan terkontrol.
+                        </p>
                         <div class="hero-actions">
                             <button class="btn" type="button" onclick="goToStep(1)">Mulai</button>
                             <button class="ghost-btn" type="button" onclick="scrollToFeatures()">Lihat Fitur</button>
                         </div>
                     </div>
+
                     <div class="feature-grid">
                         <div class="feature-card">
                             <h3>Input Unit Configuration</h3>
-                            <p>Masukkan banyak unit maintenance, kapasitas MW, dan jumlah kebutuhan maintenance setiap periode.</p>
+                            <p>Masukkan banyak unit maintenance, kapasitas MW, dan jumlah kebutuhan maintenance setiap
+                                periode.</p>
                             <div class="feature-pill">Atur unit secara dinamis</div>
                         </div>
                         <div class="feature-card">
@@ -628,7 +633,8 @@
                         </div>
                         <div class="feature-card">
                             <h3>Run Optimization</h3>
-                            <p>Jalankan ACO untuk jadwal dan A* untuk assignment dengan hasil dashboard yang lengkap.</p>
+                            <p>Jalankan ACO untuk jadwal dan A* untuk assignment dengan hasil dashboard yang lengkap.
+                            </p>
                             <div class="feature-pill">Visualisasi modern</div>
                         </div>
                         <div class="feature-card">
@@ -644,7 +650,7 @@
         <form id="schedulerForm" action="{{ route('schedular.process') }}" method="POST">
             @csrf
             <section id="step-1" class="step-section">
-                 <h1>ACO Maintenance Scheduler</h1>
+                <h1>ACO Maintenance Scheduler</h1>
                 <div class="stepper">
                     <button class="active" type="button">1. Input Unit Configuration</button>
                     <button type="button">2. Input Teams Configuration</button>
@@ -671,11 +677,24 @@
                         </div>
                         <span class="small-pill">Step 1 of 2</span>
                     </header>
-                    <div class="alert">Tambahkan konfigurasi banyak unit, kapasitas MW, dan frekuensi maintenance per 6 bulan.</div>
+                    <div class="alert">Tambahkan konfigurasi banyak unit, kapasitas MW, dan frekuensi maintenance per 6
+                        bulan.</div>
+                    <div class="form-group" style="margin-bottom: 20px; margin-top: 20px;">
+                        <label for="load_unit" style="color: var(--accent);">Load Konfigurasi Unit Tersimpan:</label>
+                        <select id="load_unit">
+                            <option value="">-- Pilih Konfigurasi Unit --</option>
+                            @foreach ($unitConfigurations as $config)
+                                <option value="{{ $config->id }}" data-units="{{ json_encode($config->units) }}">
+                                    {{ $config->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div id="units-container"></div>
                     <div class="actions">
                         <button class="btn-secondary" type="button" onclick="addUnitRow()">+ Tambah Unit</button>
-                        <button class="btn" type="button" onclick="saveUnitConfiguration()">Save Unit Configuration</button>
+                        <button class="btn" type="button" onclick="saveUnitConfiguration()">Save Unit
+                            Configuration</button>
                     </div>
                 </div>
 
@@ -700,10 +719,24 @@
                         <span class="small-pill">Step 2 of 2</span>
                     </header>
                     <div class="alert">Masukkan tim teknisi, nama tim, spesialisasi MW, dan biaya.</div>
+                    <div class="form-group" style="margin-bottom: 20px; margin-top: 20px;">
+                        <label for="load_technician" style="color: var(--accent);">Load Konfigurasi Teknisi
+                            Tersimpan:</label>
+                        <select id="load_technician">
+                            <option value="">-- Pilih Konfigurasi Teknisi --</option>
+                            @foreach ($technicianConfigurations as $config)
+                                <option value="{{ $config->id }}"
+                                    data-teams="{{ json_encode($config->technicians) }}">
+                                    {{ $config->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div id="teams-container"></div>
                     <div class="actions">
                         <button class="btn-secondary" type="button" onclick="addTeamRow()">+ Tambah Tim</button>
-                        <button class="btn" type="button" onclick="saveTechnicianConfiguration()">Save Technician Configuration</button>
+                        <button class="btn" type="button" onclick="saveTechnicianConfiguration()">Save Technician
+                            Configuration</button>
                     </div>
                 </div>
 
@@ -772,11 +805,16 @@
             document.querySelectorAll('.step-section').forEach(section => section.classList.remove('active'));
             document.getElementById('step-' + step).classList.add('active');
             saveDraft();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
 
         function scrollToFeatures() {
-            document.querySelector('.hero').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.hero').scrollIntoView({
+                behavior: 'smooth'
+            });
         }
 
         function showToast(message) {
@@ -790,9 +828,15 @@
 
         function getSavedState() {
             try {
-                return JSON.parse(sessionStorage.getItem(savedStateKey)) || { unit: false, technician: false };
+                return JSON.parse(sessionStorage.getItem(savedStateKey)) || {
+                    unit: false,
+                    technician: false
+                };
             } catch (error) {
-                return { unit: false, technician: false };
+                return {
+                    unit: false,
+                    technician: false
+                };
             }
         }
 
@@ -836,12 +880,21 @@
                 document.getElementById('num_ants').value = draft.num_ants ?? 30;
 
                 document.getElementById('units-container').innerHTML = '';
-                (draft.units?.length ? draft.units : [{ mw: 20, events: 2 }]).forEach(unit => {
+                (draft.units?.length ? draft.units : [{
+                    mw: 20,
+                    events: 2
+                }]).forEach(unit => {
                     addUnitRow(unit.mw, unit.events);
                 });
 
                 document.getElementById('teams-container').innerHTML = '';
-                (draft.teams?.length ? draft.teams : [{ name: '', type: 'condition', operator: '>=', mw_limit: 30, cost: '' }]).forEach(team => {
+                (draft.teams?.length ? draft.teams : [{
+                    name: '',
+                    type: 'condition',
+                    operator: '>=',
+                    mw_limit: 30,
+                    cost: ''
+                }]).forEach(team => {
                     addTeamRow({
                         team_name: team.name,
                         specialization: team.type,
@@ -889,7 +942,9 @@
         function removeUnitRow(button) {
             button.closest('.item-card').remove();
             reindexUnitRows();
-            setSavedState({ unit: false });
+            setSavedState({
+                unit: false
+            });
             saveDraft();
         }
 
@@ -901,18 +956,7 @@
             });
         }
 
-        function loadUnitConfiguration(select) {
-            const container = document.getElementById('units-container');
-            container.innerHTML = '';
-            if (!select.value) {
-                addUnitRow(20, 2);
-                return;
-            }
-            const config = unitConfigurations.find(c => c.id == select.value);
-            if (config && config.units) {
-                config.units.forEach(unit => addUnitRow(unit.capacity, unit.maintenance_count));
-            }
-        }
+
 
         function addTeamRow(data = null) {
             const container = document.getElementById('teams-container');
@@ -970,7 +1014,9 @@
         function removeTeamRow(button) {
             button.closest('.item-card').remove();
             reindexTeamRows();
-            setSavedState({ technician: false });
+            setSavedState({
+                technician: false
+            });
             saveDraft();
         }
 
@@ -985,19 +1031,6 @@
             });
         }
 
-        function loadTechnicianConfiguration(select) {
-            const container = document.getElementById('teams-container');
-            container.innerHTML = '';
-            if (!select.value) {
-                addTeamRow();
-                return;
-            }
-            const config = technicianConfigurations.find(c => c.id == select.value);
-            if (config && config.technicians) {
-                config.technicians.forEach(tech => addTeamRow(tech));
-            }
-        }
-
         function toggleSpecialization(select) {
             const card = select.closest('.item-card');
             const group = card.querySelector('.specialization-group');
@@ -1007,7 +1040,9 @@
                 input.disabled = isGeneral;
                 input.required = !isGeneral;
             });
-            setSavedState({ technician: false });
+            setSavedState({
+                technician: false
+            });
             saveDraft();
         }
 
@@ -1037,9 +1072,8 @@
             const form = document.getElementById('schedulerForm');
             form.action = route;
             saveDraft();
-            const excludedFields = excludedSelector
-                ? Array.from(document.querySelectorAll(`${excludedSelector} input, ${excludedSelector} select`))
-                : [];
+            const excludedFields = excludedSelector ?
+                Array.from(document.querySelectorAll(`${excludedSelector} input, ${excludedSelector} select`)) : [];
             excludedFields.forEach(field => field.disabled = true);
             if (!form.reportValidity()) {
                 excludedFields.forEach(field => field.disabled = false);
@@ -1054,25 +1088,24 @@
             const name = await askConfigurationName('Unit');
             if (!name) return;
             document.getElementById('unitConfigName').value = name;
-            submitFormTo('{{ route('units.save') }}', '#teams-container', () => setSavedState({ unit: true }));
+            submitFormTo('{{ route('units.save') }}', '#teams-container', () => setSavedState({
+                unit: true
+            }));
         }
 
         async function saveTechnicianConfiguration() {
             const name = await askConfigurationName('Teknisi');
             if (!name) return;
             document.getElementById('technicianConfigName').value = name;
-            submitFormTo('{{ route('technicians.save') }}', null, () => setSavedState({ technician: true }));
+            submitFormTo('{{ route('technicians.save') }}', null, () => setSavedState({
+                technician: true
+            }));
         }
 
         function submitOptimization() {
             const teamCount = document.querySelectorAll('#teams-container .item-card').length;
             if (teamCount === 0) {
                 showToast('Tambahkan minimal satu tim teknisi sebelum menjalankan optimasi.');
-                return;
-            }
-            const savedState = getSavedState();
-            if (!savedState.unit || !savedState.technician) {
-                showToast('Simpan Unit Configuration dan Technician Configuration terlebih dahulu sebelum menjalankan optimasi.');
                 return;
             }
             submitFormTo('{{ route('schedular.process') }}');
@@ -1092,22 +1125,32 @@
 
         document.getElementById('schedulerForm').addEventListener('input', event => {
             if (isRestoringDraft) return;
-            if (event.target.closest('#units-container') || event.target.name === 'total_mw' || event.target.name === 'num_ants') {
-                setSavedState({ unit: false });
+            if (event.target.closest('#units-container') || event.target.name === 'total_mw' || event.target
+                .name === 'num_ants') {
+                setSavedState({
+                    unit: false
+                });
             }
             if (event.target.closest('#teams-container')) {
-                setSavedState({ technician: false });
+                setSavedState({
+                    technician: false
+                });
             }
             saveDraft();
         });
 
         document.getElementById('schedulerForm').addEventListener('change', event => {
             if (isRestoringDraft) return;
-            if (event.target.closest('#units-container') || event.target.name === 'total_mw' || event.target.name === 'num_ants') {
-                setSavedState({ unit: false });
+            if (event.target.closest('#units-container') || event.target.name === 'total_mw' || event.target
+                .name === 'num_ants') {
+                setSavedState({
+                    unit: false
+                });
             }
             if (event.target.closest('#teams-container')) {
-                setSavedState({ technician: false });
+                setSavedState({
+                    technician: false
+                });
             }
             saveDraft();
         });
@@ -1141,6 +1184,49 @@
             if (event.key === 'Escape' && configNameModal.classList.contains('show')) {
                 closeConfigurationNameModal();
             }
+        });
+    </script>
+    <script>
+        // Load unit script
+        document.getElementById('load_unit').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (!selectedOption.value) return;
+
+            const unitsData = JSON.parse(selectedOption.getAttribute('data-units'));
+
+            // Kosongkan container input unit saat ini
+            const unitsContainer = document.getElementById('units-container');
+            unitsContainer.innerHTML = '';
+
+            unitsData.forEach(unit => {
+                addUnitRow(unit.capacity, unit.maintenance_count);
+            });
+
+            showToast('Konfigurasi Unit berhasil dimuat!');
+        });
+
+        // Load technician script
+        document.getElementById('load_technician').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (!selectedOption.value) return;
+
+            const teamsData = JSON.parse(selectedOption.getAttribute('data-teams'));
+
+            // Kosongkan container
+            const teamsContainer = document.getElementById('teams-container');
+            teamsContainer.innerHTML = '';
+
+            teamsData.forEach(team => {
+                addTeamRow({
+                    team_name: team.team_name,
+                    specialization: team.specialization,
+                    operator: team.operator || '>=',
+                    mw: team.mw || team.mw_limit || 30,
+                    cost: team.cost
+                });
+            });
+
+            showToast('Konfigurasi Teknisi berhasil dimuat!');
         });
     </script>
 </body>
