@@ -405,6 +405,102 @@
             </div>
         </div>
 
+        <div class="card" style="margin-bottom: 28px;">
+            <h2>Jadwal Akhir Terbaik</h2>
+            <div class="table-wrap">
+                @php
+                    // 1. Inisialisasi struktur 12 periode agar sinkron dengan data distribusi MW
+                    $computed_schedule = [];
+                    $totalCapacity = $total_mw ?? 150;
+
+                    for ($t = 1; $t <= 12; $t++) {
+                        $used = $distribution[$t - 1]['used'] ?? 0;
+                        $computed_schedule[$t] = [
+                            'used_mw'      => $used,
+                            'available_mw' => $totalCapacity - $used,
+                            'total_cost'   => 0,
+                            'details'      => []
+                        ];
+                    }
+
+                    // 2. Masukkan data penugasan tim & cost dari variabel $astar ke masing-masing periode
+                    if (isset($astar['assignments'])) {
+                        foreach ($astar['assignments'] as $a) {
+                            // Ambil angka periodenya saja (jika formatnya 'P1' atau 1)
+                            $pNum = (int) str_replace('P', '', $a['period']); 
+                            
+                            if (isset($computed_schedule[$pNum])) {
+                                $computed_schedule[$pNum]['details'][] = [
+                                    'unit' => $a['event'],
+                                    'team' => $a['team'],
+                                    'cost' => $a['cost']
+                                ];
+                                $computed_schedule[$pNum]['total_cost'] += $a['cost'];
+                            }
+                        }
+                    }
+
+                    // 3. Amankan periode kosong (jika ada periode yang tidak ada maintenance sama sekali)
+                    for ($t = 1; $t <= 12; $t++) {
+                        if (empty($computed_schedule[$t]['details'])) {
+                            $computed_schedule[$t]['details'][] = [
+                                'unit' => 'Tidak Ada',
+                                'team' => '-',
+                                'cost' => 0
+                            ];
+                        }
+                    }
+                @endphp
+
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Unit Maintenance</th>
+                            <th>Used MW</th>
+                            <th>Available MW</th>
+                            <th>Technician Team</th>
+                            <th>Cost (Juta)</th>
+                            <th>Total Cost this Period</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($computed_schedule as $period => $data)
+                            @foreach($data['details'] as $index => $detail)
+                                <tr>
+                                    @if($loop->first)
+                                        <td rowspan="{{ count($data['details']) }}"><strong>P{{ $period }}</strong></td>
+                                    @endif
+                                    
+                                    <td>
+                                        @php
+                                            // Mengambil semua angka saja dari teks unit
+                                            preg_match_all('/\d+/', $detail['unit'], $matches);
+                                            // Jika ada angka, gabungkan dengan ' dan '. Jika tidak ada (misal: "Tidak Ada"), pakai teks aslinya.
+                                            $cleanUnit = !empty($matches[0]) ? implode(' dan ', $matches[0]) : $detail['unit'];
+                                        @endphp
+                                        {{ $cleanUnit }}
+                                    </td>
+                                    
+                                    @if($loop->first)
+                                        <td rowspan="{{ count($data['details']) }}">{{ $data['used_mw'] }} MW</td>
+                                        <td rowspan="{{ count($data['details']) }}">{{ $data['available_mw'] }} MW</td>
+                                    @endif
+                                    
+                                    <td>{{ $detail['team'] }}</td>
+                                    <td>Rp {{ number_format($detail['cost'], 0, ',', '.') }} Juta</td>
+                                    
+                                    @if($loop->first)
+                                        <td rowspan="{{ count($data['details']) }}"><strong>Rp {{ number_format($data['total_cost'], 0, ',', '.') }} Juta</strong></td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="card">
             <h2>Visualisasi Hasil</h2>
             <div class="chart-container">
