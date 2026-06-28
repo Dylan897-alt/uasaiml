@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SavedUnitConfiguration;
 use App\Models\SavedTechnicianConfiguration;
+use Illuminate\Validation\ValidationException;
 
 class AIController extends Controller
 {
@@ -443,10 +444,37 @@ class AIController extends Controller
 
     public function processScheduling(Request $request)
     {
-        $total_mw    = (int) $request->input('total_mw', 150);
-        $num_ants    = (int) $request->input('num_ants', 30);
-        $units_input = $request->input('units', []);
-        $teams_input = $request->input('teams', []);
+        session()->flash('active_step', 2);
+
+        $validated = $request->validate([
+            'total_mw' => ['required', 'numeric'],
+            'num_ants' => ['required', 'numeric'],
+            'units' => ['required', 'array', 'min:1'],
+            'units.*.mw' => ['required', 'numeric'],
+            'units.*.events' => ['required', 'numeric'],
+            'teams' => ['required', 'array', 'min:1'],
+            'teams.*.name' => ['required', 'string', 'max:255'],
+            'teams.*.type' => ['required', 'in:condition,all'],
+            'teams.*.operator' => ['nullable', 'in:>=,<='],
+            'teams.*.mw_limit' => ['nullable', 'numeric'],
+            'teams.*.cost' => ['required', 'numeric'],
+        ], [
+            'required' => 'Semua input wajib diisi sebelum menjalankan optimasi.',
+            'numeric' => 'Input angka harus berupa angka valid.',
+        ]);
+
+        foreach ($validated['teams'] as $index => $team) {
+            if ($team['type'] === 'condition' && (($team['operator'] ?? null) === null || ($team['mw_limit'] ?? null) === null)) {
+                throw ValidationException::withMessages([
+                    "teams.$index.mw_limit" => 'Operator dan batas MW wajib diisi untuk MW Condition.',
+                ]);
+            }
+        }
+
+        $total_mw    = (int) $validated['total_mw'];
+        $num_ants    = (int) $validated['num_ants'];
+        $units_input = $validated['units'];
+        $teams_input = $validated['teams'];
 
         if (empty($units_input)) {
             return redirect()->back()->with('error', 'Please add at least one unit.');
@@ -503,6 +531,10 @@ class AIController extends Controller
             'distribution' => $acoResult['distribution'],
             'event_labels' => $acoResult['event_labels'],
             'astar'        => $astarResult,
+            'total_mw'    => $total_mw,
+            'num_ants'    => $num_ants,
+            'num_units'   => count($units_input),
+            'num_teams'   => count($teams_input),
             // Data tambahan untuk Visualisasi:
             'heatmapData'  => $heatmapData,
             'categoriesDaya' => $categoriesDaya,
