@@ -231,43 +231,49 @@
         /* ===================================================
    TEMA DARK MODE (DEFAULT) - TOMBOL JADI HITAM
    =================================================== */
-.btn {
-    /* Ganti background gradient pink lama Anda dengan ini */
-    background: #ffffff; 
-    color: #000000; /* Teks di dalam tombol menjadi hitam */
-    border: 1px solid rgba(0, 0, 0, 0.15); /* Garis tepi abu-abu lembut */
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+        .btn {
+            /* Ganti background gradient pink lama Anda dengan ini */
+            background: #ffffff;
+            color: #000000;
+            /* Teks di dalam tombol menjadi hitam */
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            /* Garis tepi abu-abu lembut */
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-/* Efek saat tombol diarahkan mouse (Hover) di Dark Mode */
-.btn:hover {
-    background: #f5f5f5; /* Sedikit lebih terang saat di-hover */
-    border-color: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+        /* Efek saat tombol diarahkan mouse (Hover) di Dark Mode */
+        .btn:hover {
+            background: #f5f5f5;
+            /* Sedikit lebih terang saat di-hover */
+            border-color: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
 
-/* ===================================================
+        /* ===================================================
    TEMA LIGHT MODE - TOMBOL JADI PUTIH
    Asumsi: Menggunakan class .light-mode pada <body>
    =================================================== */
-body.light .btn {
-    background: #000000; 
-    color: #ffffff; /* Teks di dalam tombol menjadi putih */
-    border: 1px solid rgba(0, 0, 0, 0.15); /* Garis tepi abu-abu lembut */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
+        body.light .btn {
+            background: #000000;
+            color: #ffffff;
+            /* Teks di dalam tombol menjadi putih */
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            /* Garis tepi abu-abu lembut */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
 
-/* Efek saat tombol diarahkan mouse (Hover) di Light Mode */
-body.light .btn:hover {
-    background: #1a1a1a; /* Sedikit abu-abu terang saat di-hover */
-    border-color: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+        /* Efek saat tombol diarahkan mouse (Hover) di Light Mode */
+        body.light .btn:hover {
+            background: #1a1a1a;
+            /* Sedikit abu-abu terang saat di-hover */
+            border-color: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
         .ghost-btn,
         .btn-secondary {
@@ -327,152 +333,166 @@ body.light .btn:hover {
         }
 
         /* Container Utama Stepper */
-.stepper-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    position: relative;
-    margin-bottom: 40px;
-    max-width: 600px; 
-    margin-left: auto;
-    margin-right: auto;
-}
+        .stepper-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-/* Garis Penghubung di Belakang Lingkaran (Default Dark Mode) */
-.stepper-container::before {
-    content: '';
-    position: absolute;
-    top: 28px; 
-    left: 10%;
-    right: 10%;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.15); 
-    z-index: 1;
-}
+        /* Garis Penghubung di Belakang Lingkaran (Default Dark Mode) */
+        .stepper-container::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.15);
+            z-index: 1;
+        }
 
-/* Wrapper Masing-Masing Step */
-.step-item {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-}
+        /* Wrapper Masing-Masing Step */
+        .step-item {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
 
-/* Lingkaran Inactive (Default Dark Mode) */
-.step-circle {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.4); 
-    background-color: var(--bg-color, #121212); /* Menggunakan variabel atau warna dasar gelap */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease;
-}
+        /* Lingkaran Inactive (Default Dark Mode) */
+        .step-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background-color: var(--bg-color, #121212);
+            /* Menggunakan variabel atau warna dasar gelap */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
 
-/* UKURAN GAMBAR DIPERBESAR */
-.step-circle img {
-    width: 60px;  /* Diperbesar dari 28px */
-    height: 60px; /* Diperbesar dari 28px */
-    object-fit: contain;
-    transition: all 0.3s ease;
-}
+        /* UKURAN GAMBAR DIPERBESAR */
+        .step-circle img {
+            width: 60px;
+            /* Diperbesar dari 28px */
+            height: 60px;
+            /* Diperbesar dari 28px */
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
 
-/* Styling Teks (Default Dark Mode) */
-.step-label {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
+        /* Styling Teks (Default Dark Mode) */
+        .step-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
 
-/* ---------------------------------------------------
+        /* ---------------------------------------------------
    TEMA DARK MODE (DEFAULT) - ACTIVE STATE PUTIH
 --------------------------------------------------- */
-.step-item.active .step-circle {
-    background-color: #ffffff; 
-    border-color: #ffffff;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); 
-}
+        .step-item.active .step-circle {
+            background-color: #ffffff;
+            border-color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
 
-.step-item.active .step-label {
-    color: #ffffff;
-    font-weight: 700;
-}
+        .step-item.active .step-label {
+            color: #ffffff;
+            font-weight: 700;
+        }
 
-/* ---------------------------------------------------
+        /* ---------------------------------------------------
    TEMA LIGHT MODE - ACTIVE STATE HITAM
-   Asumsi: Saat light mode, <body> memiliki class .light-mode 
+   Asumsi: Saat light mode, <body> memiliki class .light-mode
    (Sesuaikan dengan class trigger light mode di kodingan Anda, misal [data-theme="light"])
 --------------------------------------------------- */
-/* ===================================================
+        /* ===================================================
    PERBAIKAN TEMA LIGHT MODE (Sesuaikan class .light-mode)
    =================================================== */
 
-/* 1. Garis penghubung di belakang lingkaran menjadi abu-abu tipis */
-body.light .stepper-container::before {
-    background-color: #e0e0e0; /* Abu-abu terang untuk garis */
-}
+        /* 1. Garis penghubung di belakang lingkaran menjadi abu-abu tipis */
+        body.light .stepper-container::before {
+            background-color: #e0e0e0;
+            /* Abu-abu terang untuk garis */
+        }
 
-/* 2. Lingkaran INACTIVE di Light Mode */
-body.light-mode .step-circle {
-    border-color: #ccc; /* Outline abu-abu tipis */
-    
-    /* ⚠️ PENTING: Ganti #ffffff ini dengan warna background halaman Light Mode Anda 
+        /* 2. Lingkaran INACTIVE di Light Mode */
+        body.light-mode .step-circle {
+            border-color: #ccc;
+            /* Outline abu-abu tipis */
+
+            /* ⚠️ PENTING: Ganti #ffffff ini dengan warna background halaman Light Mode Anda
        supaya garis di belakangnya tertutup secara sempurna dan tidak tembus */
-    background-color: #ffffff; 
-}
+            background-color: #ffffff;
+        }
 
-/* 3. Teks label INACTIVE di Light Mode */
-body.light .step-label {
-    color: #666666; /* Abu-abu gelap agar tetap terbaca */
-}
+        /* 3. Teks label INACTIVE di Light Mode */
+        body.light .step-label {
+            color: #666666;
+            /* Abu-abu gelap agar tetap terbaca */
+        }
 
-/* 4. Lingkaran ACTIVE di Light Mode (Menjadi Hitam) */
-body.light .step-item.active .step-circle {
-    background-color: #000000; /* Lingkaran penuh hitam */
-    border-color: #000000;
-    box-sizing: border-box;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Efek bayangan lembut */
-}
+        /* 4. Lingkaran ACTIVE di Light Mode (Menjadi Hitam) */
+        body.light .step-item.active .step-circle {
+            background-color: #000000;
+            /* Lingkaran penuh hitam */
+            border-color: #000000;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            /* Efek bayangan lembut */
+        }
 
-/* 5. Teks label ACTIVE di Light Mode */
-body.light .step-item.active .step-label {
-    color: #000000; /* Teks menjadi hitam tegas */
-    font-weight: 700;
-}
+        /* 5. Teks label ACTIVE di Light Mode */
+        body.light .step-item.active .step-label {
+            color: #000000;
+            /* Teks menjadi hitam tegas */
+            font-weight: 700;
+        }
 
-/* 6. Efek Pembalik Warna Ikon (Opsional namun Penting) 
-   Jika ikon aco.png, astar.png, dashboard.png Anda berwarna hitam polos, 
+        /* 6. Efek Pembalik Warna Ikon (Opsional namun Penting)
+   Jika ikon aco.png, astar.png, dashboard.png Anda berwarna hitam polos,
    saat lingkaran berubah jadi hitam (active), ikonnya akan tidak kelihatan.
    Kode di bawah ini otomatis membuat ikon menjadi PUTIH saat step tersebut ACTIVE di Light Mode. */
-body.light .step-item.active .step-circle img {
-    filter: invert(1) brightness(2); 
-}
-/* ---------------------------------------------------
+        body.light .step-item.active .step-circle img {
+            filter: invert(1) brightness(2);
+        }
+
+        /* ---------------------------------------------------
    RESPONSIF UNTUK HP
 --------------------------------------------------- */
-@media (max-width: 768px) {
-    .step-circle {
-        width: 48px;
-        height: 48px;
-    }
-    .stepper-container::before {
-        top: 24px;
-    }
-    .step-circle img {
-        width: 60px; /* Gambar disesuaikan untuk HP */
-        height: 60px;
-    }
-    .step-label {
-        font-size: 0.8rem;
-    }
-}
+        @media (max-width: 768px) {
+            .step-circle {
+                width: 48px;
+                height: 48px;
+            }
+
+            .stepper-container::before {
+                top: 24px;
+            }
+
+            .step-circle img {
+                width: 60px;
+                /* Gambar disesuaikan untuk HP */
+                height: 60px;
+            }
+
+            .step-label {
+                font-size: 0.8rem;
+            }
+        }
 
         .feature-pill::before {
             content: '>';
@@ -748,75 +768,81 @@ body.light .step-item.active .step-circle img {
                 flex: 1 1 100%;
             }
         }
+
         /* Styling Banner Utama (Berbentuk Persegi Panjang Horizontal) */
-.hero-header-banner {
-    position: relative;
-    width: 100%;
-    min-height: 260px; /* Mengatur tinggi min agar membentuk persegi panjang horizontal */
-    padding: 40px;
-    border-radius: 24px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.45); /* Lapisan gelap tipis agar teks kontras */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    margin-bottom: 32px;
-}
+        .hero-header-banner {
+            position: relative;
+            width: 100%;
+            min-height: 260px;
+            /* Mengatur tinggi min agar membentuk persegi panjang horizontal */
+            padding: 40px;
+            border-radius: 24px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.45);
+            /* Lapisan gelap tipis agar teks kontras */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 32px;
+        }
 
-/* Mengatur Posisi Gambar dan Transparansinya */
-.hero-bg-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    opacity: 0.35; /* Transparansi diturunkan menjadi 15% agar tulisan sangat terbaca */
-    pointer-events: none;
-}
+        /* Mengatur Posisi Gambar dan Transparansinya */
+        .hero-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.35;
+            /* Transparansi diturunkan menjadi 15% agar tulisan sangat terbaca */
+            pointer-events: none;
+        }
 
-.hero-bg-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Menjaga gambar tetap proporsional saat memenuhi area */
-    object-position: center;
-}
+        .hero-bg-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Menjaga gambar tetap proporsional saat memenuhi area */
+            object-position: center;
+        }
 
-/* Mengatur Lapisan Teks */
-.hero-text-content {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-}
+        /* Mengatur Lapisan Teks */
+        .hero-text-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+        }
 
-.hero-text-content h2 {
-    margin-top: 0;
-    font-size: 2rem;
-    margin-bottom: 12px;
-}
+        .hero-text-content h2 {
+            margin-top: 0;
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
 
-.hero-text-content p {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    margin-bottom: 24px;
-}
+        .hero-text-content p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
 
-/* Kodingan Media Query untuk Layar HP (Sesuai Request) */
-@media (max-width: 768px) {
-    .hero-header-banner {
-        padding: 24px;
-        min-height: 220px; /* Tetap berbentuk persegi panjang horizontal di HP */
-    }
-    
-    .hero-text-content h2 {
-        font-size: 1.5rem;
-    }
-    
-    .hero-text-content p {
-        font-size: 0.95rem;
-    }
-}
+        /* Kodingan Media Query untuk Layar HP (Sesuai Request) */
+        @media (max-width: 768px) {
+            .hero-header-banner {
+                padding: 24px;
+                min-height: 220px;
+                /* Tetap berbentuk persegi panjang horizontal di HP */
+            }
+
+            .hero-text-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .hero-text-content p {
+                font-size: 0.95rem;
+            }
+        }
     </style>
 </head>
 
@@ -843,72 +869,74 @@ body.light .step-item.active .step-circle img {
             </button>
         </div>
 
-       <section id="step-0" class="step-section active">
-    <div class="hero">
-        <div class="hero-header-banner">
-            <div class="hero-bg-image">
-                <img src="{{ asset('images/fototiang.png') }}" alt="Sistem Optimasi">
-            </div>
-            
-            <div class="hero-text-content">
-                <h2>Selamat datang di sistem optimasi pemeliharaan</h2>
-                <p>Website ini membantu Anda mengatur konfigurasi unit, memasukkan tim teknisi, dan menjalankan
-                    algoritma ACO + A* untuk menghasilkan jadwal maintenance yang lebih efisien dan terkontrol.
-                </p>
-                <div class="hero-actions">
-                    <button class="btn" type="button" onclick="goToStep(1)">Mulai</button>
-                    <button class="ghost-btn" type="button" onclick="scrollToFeatures()">Lihat Fitur</button>
+        <section id="step-0" class="step-section active">
+            <div class="hero">
+                <div class="hero-header-banner">
+                    <div class="hero-bg-image">
+                        <img src="{{ asset('images/fototiang.png') }}" alt="Sistem Optimasi">
+                    </div>
+
+                    <div class="hero-text-content">
+                        <h2>Selamat datang di sistem optimasi pemeliharaan</h2>
+                        <p>Website ini membantu Anda mengatur konfigurasi unit, memasukkan tim teknisi, dan menjalankan
+                            algoritma ACO + A* untuk menghasilkan jadwal maintenance yang lebih efisien dan terkontrol.
+                        </p>
+                        <div class="hero-actions">
+                            <button class="btn" type="button" onclick="goToStep(1)">Mulai</button>
+                            <button class="ghost-btn" type="button" onclick="scrollToFeatures()">Lihat Fitur</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>Input Unit Configuration</h3>
+                        <p>Masukkan banyak unit maintenance, kapasitas MW, dan jumlah kebutuhan maintenance setiap
+                            periode.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Input Teams Configuration</h3>
+                        <p>Tambahkan tim teknisi dengan nama, spesialisasi kondisi MW, dan biaya penugasan.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Run Optimization</h3>
+                        <p>Jalankan ACO untuk jadwal dan A* untuk assignment dengan hasil dashboard yang lengkap.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Dark / Light Mode</h3>
+                        <p>Pilih tema sesuai preferensi dengan tampilan neon yang bergerak dan kontras tinggi.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="feature-grid">
-            <div class="feature-card">
-                <h3>Input Unit Configuration</h3>
-                <p>Masukkan banyak unit maintenance, kapasitas MW, dan jumlah kebutuhan maintenance setiap periode.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Input Teams Configuration</h3>
-                <p>Tambahkan tim teknisi dengan nama, spesialisasi kondisi MW, dan biaya penugasan.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Run Optimization</h3>
-                <p>Jalankan ACO untuk jadwal dan A* untuk assignment dengan hasil dashboard yang lengkap.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Dark / Light Mode</h3>
-                <p>Pilih tema sesuai preferensi dengan tampilan neon yang bergerak dan kontras tinggi.</p>
-            </div>
-        </div>
-    </div>
-</section>
+        </section>
 
         <form id="schedulerForm" action="{{ route('schedular.process') }}" method="POST">
             @csrf
             <section id="step-1" class="step-section">
-                <img src="{{ asset('images/headeraco.png') }}" alt="ACO Header" style="width: 1200px; height: 275px; margin-bottom: 20px;">
-                        <div class="stepper-container">
-            <div class="step-item active">
-                <div class="step-circle">
-                    <img src="{{ asset('images/aco.png') }}" alt="Unit Config">
-                </div>
-                <span class="step-label">Unit Config</span>
-            </div>
+                <img src="{{ asset('images/headeraco.png') }}" alt="ACO Header"
+                    style="width: 1200px; height: 275px; margin-bottom: 20px;">
+                <div class="stepper-container">
+                    <div class="step-item active">
+                        <div class="step-circle">
+                            <img src="{{ asset('images/aco.png') }}" alt="Unit Config">
+                        </div>
+                        <span class="step-label">Unit Config</span>
+                    </div>
 
-            <div class="step-item">
-                <div class="step-circle">
-                    <img src="{{ asset('images/astar.png') }}" alt="Teams Config">
-                </div>
-                <span class="step-label">Teams Config</span>
-            </div>
+                    <div class="step-item">
+                        <div class="step-circle">
+                            <img src="{{ asset('images/astar.png') }}" alt="Teams Config">
+                        </div>
+                        <span class="step-label">Teams Config</span>
+                    </div>
 
-            <div class="step-item">
-                <div class="step-circle">
-                    <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard">
+                    <div class="step-item">
+                        <div class="step-circle">
+                            <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard">
+                        </div>
+                        <span class="step-label">Dashboard</span>
+                    </div>
                 </div>
-                <span class="step-label">Dashboard</span>
-            </div>
-        </div>
 
                 <div class="card">
                     <div class="grid-2">
@@ -916,12 +944,26 @@ body.light .step-item.active .step-circle img {
                             <label for="total_mw">Total Capacity (MW)</label>
                             <input id="total_mw" type="number" name="total_mw" value="150" required>
                         </div>
+
                         <div class="form-group">
                             <label for="num_ants">Number of Ants</label>
                             <input id="num_ants" type="number" name="num_ants" value="30" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="recommended_mw">Recommended MW Above</label>
+                            <input id="recommended_mw" type="number" name="recommended_mw" value="115" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dangerous_mw">Dangerous MW Below</label>
+                            <input id="dangerous_mw" type="number" name="dangerous_mw" value="100" required>
+                        </div>
                     </div>
-                    <p class="note">Masukkan total kapasitas dan jumlah semut untuk algoritma ACO.</p>
+
+                    <p class="note">
+                        Masukkan total kapasitas, jumlah semut, dan kapasitas minimum yang direkomendasikan.
+                    </p>
                 </div>
 
                 <div class="card">
@@ -959,29 +1001,30 @@ body.light .step-item.active .step-circle img {
             </section>
 
             <section id="step-2" class="step-section">
-                <img src="{{ asset('images/headerastar.png') }}" alt="A* Header" style="width: 1200px; height: 275px; margin-bottom: 20px;">
+                <img src="{{ asset('images/headerastar.png') }}" alt="A* Header"
+                    style="width: 1200px; height: 275px; margin-bottom: 20px;">
                 <div class="stepper-container">
-                <div class="step-item active">
-                    <div class="step-circle">
-                        <img src="{{ asset('images/aco.png') }}" alt="Unit Config">
+                    <div class="step-item active">
+                        <div class="step-circle">
+                            <img src="{{ asset('images/aco.png') }}" alt="Unit Config">
+                        </div>
+                        <span class="step-label">Unit Config</span>
                     </div>
-                    <span class="step-label">Unit Config</span>
-                </div>
 
-                <div class="step-item active">
-                    <div class="step-circle">
-                        <img src="{{ asset('images/astar.png') }}" alt="Teams Config">
+                    <div class="step-item active">
+                        <div class="step-circle">
+                            <img src="{{ asset('images/astar.png') }}" alt="Teams Config">
+                        </div>
+                        <span class="step-label">Teams Config</span>
                     </div>
-                    <span class="step-label">Teams Config</span>
-                </div>
 
-                <div class="step-item">
-                    <div class="step-circle">
-                        <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard">
+                    <div class="step-item">
+                        <div class="step-circle">
+                            <img src="{{ asset('images/dashboard.png') }}" alt="Dashboard">
+                        </div>
+                        <span class="step-label">Dashboard</span>
                     </div>
-                    <span class="step-label">Dashboard</span>
                 </div>
-            </div>
 
                 <div class="card">
                     <header class="card-header">
@@ -1136,6 +1179,8 @@ body.light .step-item.active .step-circle img {
                 step: Number(document.querySelector('.step-section.active')?.id?.replace('step-', '') || 0),
                 total_mw: document.getElementById('total_mw')?.value || '',
                 num_ants: document.getElementById('num_ants')?.value || '',
+                recommended_mw: document.getElementById('recommended_mw')?.value || '',
+                dangerous_mw: document.getElementById('dangerous_mw')?.value || '',
                 units: collectRows('#units-container'),
                 teams: collectRows('#teams-container'),
             }));
@@ -1150,6 +1195,8 @@ body.light .step-item.active .step-circle img {
                 isRestoringDraft = true;
                 document.getElementById('total_mw').value = draft.total_mw ?? 150;
                 document.getElementById('num_ants').value = draft.num_ants ?? 30;
+                document.getElementById('recommended_mw').value = draft.recommended_mw ?? 115;
+                document.getElementById('dangerous_mw').value = draft.dangerous_mw ?? 100;
 
                 document.getElementById('units-container').innerHTML = '';
                 (draft.units?.length ? draft.units : [{

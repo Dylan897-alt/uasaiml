@@ -22,14 +22,14 @@ class AIController extends Controller
 
     // HELPERS
 
-    private function calculateAttractiveness($remaining_mw)
+    private function calculateAttractiveness($remaining_mw, $recommended_mw, $dangerous_mw)
     {
-        if ($remaining_mw < 100) return 0.0001;
-        if ($remaining_mw < 115) return 0.5;
+        if ($remaining_mw < $dangerous_mw) return 0.0001;
+        if ($remaining_mw < $recommended_mw) return 0.5;
         return 1.0;
     }
 
-    private function scoreSolution($solution, $listrik, $total_mw, $num_periods)
+    private function scoreSolution($solution, $listrik, $total_mw, $num_periods, $recommended_mw, $dangerous_mw)
     {
         $penalty = 0;
         for ($t = 0; $t < $num_periods; $t++) {
@@ -38,8 +38,8 @@ class AIController extends Controller
                 $total_used += $solution[$i][$t] * $listrik[$i];
             }
             $remaining = $total_mw - $total_used;
-            if ($remaining < 100) $penalty += 1000;
-            elseif ($remaining < 115) $penalty += 100;
+            if ($remaining < $dangerous_mw) $penalty += 1000;
+            elseif ($remaining < $recommended_mw) $penalty += 100;
         }
         return 1 / (1 + $penalty);
     }
@@ -85,7 +85,9 @@ class AIController extends Controller
         $unit_groups,
         $alpha,
         $beta,
-        $maxEventsPerPeriod
+        $maxEventsPerPeriod,
+        $recommended_mw,
+        $dangerous_mw
     ) {
         $used_mw = array_fill(0, $num_periods, 0);
         $eventsPerPeriod = array_fill(0, $num_periods, 0);
@@ -104,7 +106,7 @@ class AIController extends Controller
 
             for ($t = 0; $t < $num_periods; $t++) {
                 $remaining = $total_mw - ($used_mw[$t] + $listrik[$i]);
-                $attractiveness[$t] = $this->calculateAttractiveness($remaining);
+                $attractiveness[$t] = $this->calculateAttractiveness($remaining, $recommended_mw, $dangerous_mw);
             }
 
             for ($t = 0; $t < $num_periods; $t++) {
@@ -181,7 +183,7 @@ class AIController extends Controller
     }
 
     // ACO
-    private function runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod)
+    private function runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod, $recommended_mw, $dangerous_mw)
     {
         $eventData = $this->buildEvents($units_input);
         $listrik = $eventData['listrik'];
@@ -213,10 +215,12 @@ class AIController extends Controller
                     $unit_groups,
                     $alpha,
                     $beta,
-                    $maxEventsPerPeriod
+                    $maxEventsPerPeriod,
+                    $recommended_mw,
+                    $dangerous_mw
                 );
                 $ants[] = $sol;
-                $s = $this->scoreSolution($sol, $listrik, $total_mw, $num_periods);
+                $s = $this->scoreSolution($sol, $listrik, $total_mw, $num_periods, $recommended_mw, $dangerous_mw);
 
                 if ($s > $bestScore) {
                     $bestScore = $s;
@@ -231,7 +235,7 @@ class AIController extends Controller
             }
 
             foreach ($ants as $ant) {
-                $c = $this->scoreSolution($ant, $listrik, $total_mw, $num_periods);
+                $c = $this->scoreSolution($ant, $listrik, $total_mw, $num_periods, $recommended_mw, $dangerous_mw);
                 for ($i = 0; $i < $num_events; $i++) {
                     for ($t = 0; $t < $num_periods; $t++) {
                         if ($ant[$i][$t] == 1) {
@@ -447,20 +451,24 @@ class AIController extends Controller
         session()->flash('active_step', 2);
 
         $validated = $request->validate([
-            'total_mw' => ['required', 'numeric'],
-            'num_ants' => ['required', 'numeric'],
+            'total_mw' => ['required', 'numeric', 'min:0'],
+            'recommended_mw' => ['required', 'numeric', 'min:0'],
+            'dangerous_mw' => ['required', 'numeric', 'min:0', 'lt:recommended_mw'],
+            'num_ants' => ['required', 'numeric', 'min:0'],
             'units' => ['required', 'array', 'min:1'],
-            'units.*.mw' => ['required', 'numeric'],
-            'units.*.events' => ['required', 'numeric'],
+            'units.*.mw' => ['required', 'numeric', 'min:0'],
+            'units.*.events' => ['required', 'numeric', 'min:0'],
             'teams' => ['required', 'array', 'min:1'],
             'teams.*.name' => ['required', 'string', 'max:255'],
             'teams.*.type' => ['required', 'in:condition,all'],
             'teams.*.operator' => ['nullable', 'in:>=,<='],
-            'teams.*.mw_limit' => ['nullable', 'numeric'],
-            'teams.*.cost' => ['required', 'numeric'],
+            'teams.*.mw_limit' => ['nullable', 'numeric', 'min:0'],
+            'teams.*.cost' => ['required', 'numeric', 'min:0'],
         ], [
             'required' => 'Semua input wajib diisi sebelum menjalankan optimasi.',
             'numeric' => 'Input angka harus berupa angka valid.',
+            'min.numeric' => 'Nilai angka tidak boleh negatif.',
+            'dangerous_mw.lt' => 'Dangerous MW harus lebih kecil dari Recommended MW.',
         ]);
 
         foreach ($validated['teams'] as $index => $team) {
@@ -472,6 +480,8 @@ class AIController extends Controller
         }
 
         $total_mw    = (int) $validated['total_mw'];
+        $recommended_mw = (int) $validated['recommended_mw'];
+        $dangerous_mw = (int) $validated['dangerous_mw'];
         $num_ants    = (int) $validated['num_ants'];
         $units_input = $validated['units'];
         $teams_input = $validated['teams'];
@@ -487,7 +497,7 @@ class AIController extends Controller
             $maxEventsPerPeriod = count($teams_input);
         }
 
-        $acoResult = $this->runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod);
+        $acoResult = $this->runACO($total_mw, $num_ants, $units_input, $maxEventsPerPeriod, $recommended_mw, $dangerous_mw);
 
         // Run A* using ACO output
         $astarResult = null;
@@ -500,7 +510,7 @@ class AIController extends Controller
             }
         }
 
-        // 1. Siapkan data untuk Heatmap (Event x Periode)
+        // Siapkan data untuk Heatmap (Event x Periode)
         $heatmapData = [];
         for ($i = 0; $i < $acoResult['num_events']; $i++) {
             $dataPeriode = [];
@@ -516,7 +526,7 @@ class AIController extends Controller
             ];
         }
 
-        // 2. Siapkan data untuk Bar Chart Distribusi Daya
+        // Siapkan data untuk Bar Chart Distribusi Daya
         $categoriesDaya = [];
         $dayaUsed = [];
         $dayaRemaining = [];
